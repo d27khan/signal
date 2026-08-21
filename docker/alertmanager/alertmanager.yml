@@ -1,0 +1,49 @@
+# Phase 3: tuned routing — the "after" state.
+#   - group_by batches related alerts (e.g. multiple routes tripping the
+#     same alertname) into one notification instead of one per instance.
+#   - severity:page gets short group_wait/repeat_interval (it's urgent);
+#     severity:ticket gets long ones (it's not).
+#   - inhibit_rules suppress the latency ticket when it's a known
+#     downstream symptom of an already-firing saturation page, so one
+#     root cause produces one notification instead of two.
+route:
+  receiver: ticket-default
+  group_by: ["alertname", "route"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - match:
+        severity: page
+      receiver: page
+      group_wait: 10s
+      group_interval: 2m
+      repeat_interval: 1h
+    - match:
+        severity: ticket
+      receiver: ticket-default
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+
+inhibit_rules:
+  - source_match:
+      alertname: HighQueueDepth
+    target_match:
+      alertname: HighLatencyP95
+    equal: []
+  - source_match:
+      alertname: HighCPU
+    target_match:
+      alertname: HighLatencyP95
+    equal: []
+
+receivers:
+  - name: page
+    webhook_configs:
+      - url: http://webhook-receiver:9099/webhook
+        send_resolved: true
+  - name: ticket-default
+    webhook_configs:
+      - url: http://webhook-receiver:9099/webhook
+        send_resolved: true

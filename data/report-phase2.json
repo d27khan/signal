@@ -1,0 +1,29 @@
+{
+  "phase": "phase2",
+  "generatedAt": "2026-08-05T03:29:22.402Z",
+  "graceMs": 15000,
+  "windowMins": null,
+  "totals": {
+    "realFaultWindows": 9,
+    "noiseFaultWindows": 8,
+    "alertInstances": 10,
+    "rawNotifications": 49,
+    "truePositives": 8,
+    "falsePositives": 2,
+    "falsePositivesOnNoise": 2,
+    "falsePositivesUnexplained": 0,
+    "falsePositiveRate": 0.2,
+    "faultsDetected": 9,
+    "faultsMissed": 0,
+    "detectionRate": 1,
+    "alertsPerHour": 31.42
+  },
+  "bySeverity": {
+    "page": 10
+  },
+  "byAlertname": {
+    "HighLatencyP95": 6,
+    "HighErrorRate": 4
+  },
+  "missedFaults": []
+}

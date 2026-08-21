@@ -1,0 +1,4 @@
+node_modules/
+data/*.jsonl
+docker/prometheus/rules/active/*.yml
+.DS_Store

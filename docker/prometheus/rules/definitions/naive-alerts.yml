@@ -1,0 +1,54 @@
+# Phase 2: "naive" alerting — this is the deliberate "before" state.
+#
+# Anti-patterns on purpose:
+#   - `for: 0s` on everything: fires the instant a threshold is crossed,
+#     no debounce, so a single bad scrape pages.
+#   - thresholds set at "looks reasonable on a dashboard" levels without
+#     checking them against normal traffic noise (the `blip` fault type
+#     and even ordinary jitter cross them constantly).
+#   - every alert is `severity: page` — no ticket/log-only tier, so
+#     everything wakes someone up.
+groups:
+  - name: naive-thresholds
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[1m]))
+          /
+          sum(rate(http_requests_total[1m]))
+          > 0.05
+        for: 0s
+        labels:
+          severity: page
+        annotations:
+          summary: "Error rate above 5%"
+          runbook: "runbooks/high-error-rate.md"
+
+      - alert: HighLatencyP95
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le))
+          > 0.2
+        for: 0s
+        labels:
+          severity: page
+        annotations:
+          summary: "P95 latency above 200ms"
+          runbook: "runbooks/high-latency.md"
+
+      - alert: HighQueueDepth
+        expr: signal_queue_depth > 50
+        for: 0s
+        labels:
+          severity: page
+        annotations:
+          summary: "Queue depth above 50"
+          runbook: "runbooks/saturation.md"
+
+      - alert: HighCPU
+        expr: signal_cpu_percent > 70
+        for: 0s
+        labels:
+          severity: page
+        annotations:
+          summary: "CPU above 70%"
+          runbook: "runbooks/saturation.md"

@@ -1,0 +1,46 @@
+{
+  "phase": "phase3",
+  "generatedAt": "2026-08-05T04:03:32.294Z",
+  "graceMs": 15000,
+  "windowMins": null,
+  "totals": {
+    "realFaultWindows": 14,
+    "noiseFaultWindows": 17,
+    "alertInstances": 6,
+    "rawNotifications": 5,
+    "truePositives": 6,
+    "falsePositives": 0,
+    "falsePositivesOnNoise": 0,
+    "falsePositivesUnexplained": 0,
+    "falsePositiveRate": 0,
+    "faultsDetected": 11,
+    "faultsMissed": 3,
+    "detectionRate": 0.786,
+    "alertsPerHour": 11.28
+  },
+  "bySeverity": {
+    "page": 2,
+    "ticket": 4
+  },
+  "byAlertname": {
+    "HighQueueDepth": 2,
+    "HighLatencyP95": 4
+  },
+  "missedFaults": [
+    {
+      "fault": "error_burst",
+      "start": "2026-08-05T03:54:20.382Z",
+      "durationMs": 20264
+    },
+    {
+      "fault": "error_burst",
+      "start": "2026-08-05T03:58:04.522Z",
+      "durationMs": 52721
+    },
+    {
+      "fault": "saturation",
+      "start": "2026-08-05T04:03:07.600Z",
+      "durationMs": 24693
+    }
+  ]
+}

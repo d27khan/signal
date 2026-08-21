@@ -1,0 +1,57 @@
+# Phase 3: tuned alerting — the "after" state.
+#
+# Changes from the naive rule set (docker/prometheus/rules/definitions/naive-alerts.yml):
+#   - `for:` durations require the condition to be sustained, so single-scrape
+#     blips (the `blip` fault type, and ordinary jitter) don't page.
+#   - thresholds recalibrated against observed normal-traffic noise, not
+#     just "looks reasonable" (see docs/tuning-notes.md).
+#   - severity tiers split page vs ticket, only real customer-facing
+#     conditions (error_burst, saturation) page; a sustained latency
+#     regression on its own is a ticket, not a page.
+#   - Alertmanager (docker/alertmanager/alertmanager.yml) adds grouping,
+#     a repeat interval, and an inhibition rule so a saturation event
+#     doesn't ALSO page separately for the latency it causes.
+groups:
+  - name: tuned-thresholds
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[1m]))
+          /
+          sum(rate(http_requests_total[1m]))
+          > 0.25
+        for: 30s
+        labels:
+          severity: page
+        annotations:
+          summary: "Sustained error rate above 25% for 30s+"
+          runbook: "runbooks/high-error-rate.md"
+
+      - alert: HighLatencyP95
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[2m])) by (le))
+          > 0.35
+        for: 45s
+        labels:
+          severity: ticket
+        annotations:
+          summary: "Sustained P95 latency above 350ms for 45s+"
+          runbook: "runbooks/high-latency.md"
+
+      - alert: HighQueueDepth
+        expr: signal_queue_depth > 40
+        for: 30s
+        labels:
+          severity: page
+        annotations:
+          summary: "Sustained queue depth above 40 for 30s+"
+          runbook: "runbooks/saturation.md"
+
+      - alert: HighCPU
+        expr: signal_cpu_percent > 60
+        for: 30s
+        labels:
+          severity: ticket
+        annotations:
+          summary: "Sustained CPU above 60% for 30s+"
+          runbook: "runbooks/saturation.md"
